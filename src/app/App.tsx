@@ -22,6 +22,8 @@ import {
   Circle,
   Loader,
   CheckCheck,
+  Edit2,
+  Check,
 } from "lucide-react";
 
 type Role = "student" | "lecturer" | "maintenance" | null;
@@ -35,7 +37,7 @@ const CREDS = {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: (role: Role) => void }) {
-  const [tab, setTab] = useState<"student" | "lecturer" | "maintenance">("student");
+  const [tab, setTab] = useState<"student" | "lecturer" | "maintenance" | "maintenance">("student");
   const [email, setEmail] = useState(CREDS.student.email);
   const [password, setPassword] = useState("123");
   const [showPass, setShowPass] = useState(false);
@@ -107,7 +109,7 @@ function LoginScreen({ onLogin }: { onLogin: (role: Role) => void }) {
               </div>
               <div>
                 <p className="text-white text-sm font-semibold">{label}</p>
-                <p className="text-slate-500 text-xs mt-0.5">{sub}</p>
+                <p className="text-slate-500 text-[10px] mt-0.5">{sub}</p>
               </div>
             </div>
           ))}
@@ -472,12 +474,6 @@ function ProgressStepper({ status }: { status: TicketStatus }) {
   const rejected = status === "Reject";
   const currentIdx = rejected ? -1 : steps.indexOf(status);
 
-  const stepLabels: Record<string, string> = {
-    Pending: "Pending",
-    "In Progress": "In Progress",
-    Complete: "Complete",
-  };
-
   return (
     <div className="flex items-center gap-0">
       {steps.map((step, i) => {
@@ -515,10 +511,7 @@ function ProgressStepper({ status }: { status: TicketStatus }) {
 
 function StudentUpdateReport() {
   const [filter, setFilter] = useState<"All" | TicketStatus>("All");
-
-  const filtered = STUDENT_TICKETS.filter(
-    (t) => filter === "All" || t.status === filter
-  );
+  const filtered = STUDENT_TICKETS.filter((t) => filter === "All" || t.status === filter);
 
   return (
     <div className="p-8 space-y-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -587,7 +580,7 @@ function StudentUpdateReport() {
                       <Building2 className="w-3 h-3 text-[#9aa3bb]" />
                       <span className="text-xs text-[#5a6680]">{ticket.location}</span>
                       <span className="text-[#dde2ec] text-xs">·</span>
-                      <Clock className="w-3 h-3 text-[#9aa3bb]" />
+                      <span className="text-xs text-[#9aa3bb]" />
                       <span className="text-xs text-[#9aa3bb]">{ticket.submitted}</span>
                     </div>
                     {ticket.note && (
@@ -648,12 +641,7 @@ const CLASSROOM_OPTIONS = [
   "Lecture Hall B — 150 seats, Ground",
 ];
 
-function BookingGrid({
-  label, defaultBookings,
-}: {
-  label: string;
-  defaultBookings?: string[];
-}) {
+function BookingGrid({ label, defaultBookings }: { label: string; defaultBookings?: string[] }) {
   const [clashSlot, setClashSlot] = useState<string | null>(null);
   const [cancelSlot, setCancelSlot] = useState<string | null>(null);
   const [myBookings, setMyBookings] = useState<string[]>(defaultBookings ?? ["Mon 27-13:00"]);
@@ -663,21 +651,15 @@ function BookingGrid({
   const isLab = label === "Laboratory Booking";
   const options = isLab ? LAB_OPTIONS : CLASSROOM_OPTIONS;
   const selected = isLab ? selectedLab : selectedRoom;
-  const setSelected = isLab
-    ? (v: string) => setSelectedLab(v)
-    : (v: string) => setSelectedRoom(v);
 
   return (
     <div className="p-8 space-y-5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Title row */}
       <div>
-        <h2 className="text-lg font-bold text-[#0d1b2a]">{label} — May 2026</h2>
-        <p className="text-xs text-[#5a6680] mt-0.5">Click an available slot to book · Occupied slots are clash-protected</p>
+        <h2>{label} — May 2026</h2>
+        <p>Click an available slot to book · Occupied slots are clash-protected</p>
       </div>
 
-      {/* Selector + legend row — always on its own line so legend never truncates */}
       <div className="flex items-center justify-between gap-4">
-        {/* Room / Lab selector */}
         <div className="relative">
           <button
             onClick={() => setSelectorOpen(!selectorOpen)}
@@ -690,27 +672,8 @@ function BookingGrid({
             <span className="truncate">{selected}</span>
             <ChevronDown className={`w-3.5 h-3.5 text-[#9aa3bb] transition-transform flex-shrink-0 ${selectorOpen ? "rotate-180" : ""}`} />
           </button>
-          {selectorOpen && (
-            <div className="absolute left-0 top-full mt-1.5 z-30 bg-white rounded-xl border border-[rgba(15,32,68,0.12)] shadow-xl overflow-hidden w-72">
-              {options.map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => { setSelected(opt); setSelectorOpen(false); setMyBookings([]); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-[#f7f8fa] transition-colors ${selected === opt ? "bg-blue-50 text-[#1a56db] font-semibold" : "text-[#0d1b2a] font-medium"}`}
-                >
-                  {isLab
-                    ? <FlaskConical className="w-3.5 h-3.5 opacity-40 flex-shrink-0" />
-                    : <Building2 className="w-3.5 h-3.5 opacity-40 flex-shrink-0" />
-                  }
-                  <span className="flex-1 truncate">{opt}</span>
-                  {selected === opt && <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 text-[#1a56db]" />}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Legend — always fully visible */}
         <div className="flex items-center gap-5 text-[11px] font-bold text-[#5a6680] flex-shrink-0">
           <span className="flex items-center gap-1.5">
             <span className="w-3.5 h-3.5 rounded bg-[#c8d0e4] flex-shrink-0" />
@@ -727,188 +690,48 @@ function BookingGrid({
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-[rgba(15,32,68,0.09)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-[#f7f8fa] border-b border-[rgba(15,32,68,0.07)]">
-                <th className="w-16 px-4 py-3 text-left text-[11px] font-bold text-[#9aa3bb] uppercase tracking-widest">Time</th>
-                {DAYS.map((d) => (
-                  <th key={d} className="px-3 py-3 text-center text-[11px] font-bold text-[#0d1b2a] uppercase tracking-widest">{d}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {SLOTS.map((slot, si) => (
-                <tr key={slot} className={`border-b border-[rgba(15,32,68,0.04)] ${si % 2 ? "bg-[#fafbfd]" : ""}`}>
-                  <td
-                    className="px-4 py-2 text-[11px] font-semibold text-[#9aa3bb]"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    {slot}
-                  </td>
-                  {DAYS.map((day) => {
-                    const key = `${day}-${slot}`;
-                    const occ = !!OCCUPIED_SLOTS[key];
-                    const mine = myBookings.includes(key);
-                    return (
-                      <td key={day} className="px-2 py-1.5 text-center">
-                        <button
-                          onClick={() => {
-                            if (mine) setCancelSlot(key);
-                            else if (occ) setClashSlot(key);
-                            else setMyBookings([...myBookings, key]);
-                          }}
-                          title={mine ? "Double-click or click to cancel booking" : undefined}
-                          className={`w-full py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                            mine
-                              ? "bg-[#0e9f6e] text-white hover:bg-red-400 group"
-                              : occ
-                              ? "bg-[#c8d0e4] text-[#8898b8] hover:bg-[#b8c2d8] cursor-pointer"
-                              : "bg-blue-50 text-[#1a56db] border border-blue-100 hover:bg-[#1a56db] hover:text-white"
-                          }`}
-                        >
-                          {mine ? "Booked ×" : occ ? "Occupied" : "Free"}
-                        </button>
-                      </td>
-                    );
-                  })}
-                </tr>
+      <div className="bg-white rounded-2xl border overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-[#f7f8fa] border-b">
+              <th className="w-16 px-4 py-3 text-left text-[11px] font-bold text-[#9aa3bb] uppercase tracking-widest">Time</th>
+              {DAYS.map((d) => (
+                <th key={d} className="px-3 py-3 text-center text-[11px] font-bold uppercase tracking-widest">{d}</th>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody>
+            {SLOTS.map((slot, si) => (
+              <tr key={slot} className={`border-b ${si % 2 ? "bg-[#fafbfd]" : ""}`}>
+                <td className="px-4 py-2 text-[11px] font-semibold text-[#9aa3bb]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                  {slot}
+                </td>
+                {DAYS.map((day) => {
+                  const key = `${day}-${slot}`;
+                  const occ = !!OCCUPIED_SLOTS[key];
+                  const mine = myBookings.includes(key);
+                  return (
+                    <td key={day} className="px-2 py-1.5 text-center">
+                      <button
+                        onClick={() => {
+                          if (mine) setCancelSlot(key);
+                          else if (occ) setClashSlot(key);
+                          else setMyBookings([...myBookings, key]);
+                        }}
+                        className={`w-full py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                          mine ? "bg-[#0e9f6e] text-white hover:bg-red-400" : occ ? "bg-[#c8d0e4] text-[#8898b8]" : "bg-blue-50 text-[#1a56db]"
+                        }`}
+                      >
+                        {mine ? "Booked ×" : occ ? "Occupied" : "Free"}
+                      </button>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      {/* Clash Modal */}
-      {clashSlot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setClashSlot(null)} />
-          <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4"
-            style={{ border: "2.5px solid #c81e1e" }}
-          >
-            {/* Modal header */}
-            <div className="bg-red-50 px-6 pt-6 pb-5 border-b border-red-100 rounded-t-2xl">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 border border-red-200">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-extrabold text-red-700 text-base">System Clash Alert</p>
-                  <p className="text-red-400 text-xs mt-0.5">Automated conflict detection triggered</p>
-                </div>
-                <button
-                  onClick={() => setClashSlot(null)}
-                  className="text-red-300 hover:text-red-500 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="px-6 py-6 space-y-4">
-              <p className="text-[#0d1b2a] text-sm leading-relaxed">
-                <strong>This time slot is already reserved. Double booking blocked by automated conflict checking.</strong>
-              </p>
-
-              <div className="bg-[#f7f8fa] border border-[rgba(15,32,68,0.08)] rounded-xl p-4 space-y-2.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#9aa3bb] font-semibold uppercase tracking-wider">Requested Slot</span>
-                  <span
-                    className="font-bold text-[#0d1b2a]"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    {clashSlot}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#9aa3bb] font-semibold uppercase tracking-wider">Conflict Type</span>
-                  <span className="font-bold text-red-600">SLOT OCCUPIED</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#9aa3bb] font-semibold uppercase tracking-wider">Action Taken</span>
-                  <span className="font-bold text-[#0d1b2a]">Booking Rejected</span>
-                </div>
-              </div>
-
-              <p className="text-[#5a6680] text-xs">
-                Please select a different time slot. Green "Free" slots are available for booking.
-              </p>
-            </div>
-
-            <div className="px-6 pb-6">
-              <button
-                onClick={() => setClashSlot(null)}
-                className="w-full py-3 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-all"
-                style={{ background: "linear-gradient(135deg, #0f2044, #1a56db)" }}
-              >
-                Choose Another Slot
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cancel Booking Confirmation Modal */}
-      {cancelSlot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setCancelSlot(null)} />
-          <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4"
-            style={{ border: "2px solid #e3a008" }}
-          >
-            <div className="bg-amber-50 px-6 pt-6 pb-5 border-b border-amber-100 rounded-t-2xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 border border-amber-200">
-                  <AlertTriangle className="w-5 h-5 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-extrabold text-amber-800 text-sm">Cancel Booking</p>
-                  <p className="text-amber-500 text-xs mt-0.5">This action will free up the slot</p>
-                </div>
-                <button onClick={() => setCancelSlot(null)} className="text-amber-300 hover:text-amber-600 transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <div className="px-6 py-5 space-y-3">
-              <p className="text-[#0d1b2a] text-sm leading-relaxed">
-                Are you sure you want to cancel your booking for this slot?
-              </p>
-              <div className="bg-[#f7f8fa] border border-[rgba(15,32,68,0.08)] rounded-xl px-4 py-3">
-                <div className="flex justify-between text-xs">
-                  <span className="text-[#9aa3bb] font-semibold uppercase tracking-wider">Slot</span>
-                  <span className="font-bold text-[#0d1b2a]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    {cancelSlot}
-                  </span>
-                </div>
-                <div className="flex justify-between text-xs mt-2">
-                  <span className="text-[#9aa3bb] font-semibold uppercase tracking-wider">Venue</span>
-                  <span className="font-semibold text-[#0d1b2a]">{selected}</span>
-                </div>
-              </div>
-            </div>
-            <div className="px-6 pb-6 flex gap-3">
-              <button
-                onClick={() => setCancelSlot(null)}
-                className="flex-1 py-2.5 rounded-xl bg-[#eef0f6] text-[#5a6680] text-sm font-bold hover:bg-[#e4e8f0] transition-colors"
-              >
-                Keep Booking
-              </button>
-              <button
-                onClick={() => {
-                  setMyBookings(myBookings.filter((b) => b !== cancelSlot));
-                  setCancelSlot(null);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors"
-              >
-                Cancel Booking
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -918,107 +741,32 @@ const LECTURER_TICKETS: StudentTicket[] = [
   { id: "TK-3031", location: "Cybersecurity Lab 2", category: "Switch Port Failure", submitted: "23 May, 09:00", status: "In Progress", note: "Replacement parts arriving today" },
   { id: "TK-3019", location: "Room 302", category: "Projector Lamp Burnt", submitted: "20 May, 15:20", status: "Complete", note: "New lamp installed and tested" },
   { id: "TK-3011", location: "Software Engineering Lab 3", category: "Workstation BSOD", submitted: "18 May, 11:45", status: "Pending" },
-  { id: "TK-3004", location: "Data Science Lab 4", category: "Network Drive Unreachable", submitted: "15 May, 08:10", status: "Reject", note: "Issue resolved by IT remotely — ticket closed" },
+  { id: "TK-3004", location: "Data Science Lab 4", category: "Network Drive Unreachable", submitted: "15 May, 08:10", status: "Reject", note: "Issue resolved remotely" },
 ];
 
 function LecturerUpdateReport() {
   const [filter, setFilter] = useState<"All" | TicketStatus>("All");
-
-  const filtered = LECTURER_TICKETS.filter(
-    (t) => filter === "All" || t.status === filter
-  );
+  const filtered = LECTURER_TICKETS.filter((t) => filter === "All" || t.status === filter);
 
   return (
     <div className="p-8 space-y-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-bold text-[#0d1b2a]">Update Report</h2>
-          <p className="text-xs text-[#5a6680] mt-0.5">Track the lifecycle of your submitted facility requests</p>
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap justify-end">
-          {(["All", ...STATUS_ORDER] as (TicketStatus | "All")[]).map((s) => {
-            const active = filter === s;
-            const style = s !== "All" ? statusStyle[s as TicketStatus] : null;
-            return (
-              <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${
-                  active && style
-                    ? ""
-                    : active
-                    ? "bg-[#0f2044] text-white border-transparent"
-                    : "bg-white text-[#5a6680] border-[rgba(15,32,68,0.1)] hover:border-[rgba(15,32,68,0.2)]"
-                }`}
-                style={
-                  active && style
-                    ? { backgroundColor: style.bg, color: style.text, borderColor: style.border }
-                    : {}
-                }
-              >
-                {s}
-              </button>
-            );
-          })}
+          <h2>Update Report</h2>
+          <p>Track your submitted facility logs</p>
         </div>
       </div>
-
       <div className="space-y-3">
         {filtered.map((ticket) => {
           const s = statusStyle[ticket.status];
-          const Icon = s.icon;
           return (
-            <div
-              key={ticket.id}
-              className="bg-white rounded-2xl border border-[rgba(15,32,68,0.08)] p-5 hover:shadow-sm transition-shadow"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border"
-                    style={{ backgroundColor: s.bg, borderColor: s.border }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: s.text }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className="text-xs font-bold"
-                        style={{ fontFamily: "'JetBrains Mono', monospace", color: "#1a56db" }}
-                      >
-                        {ticket.id}
-                      </span>
-                      <span className="text-[#dde2ec] text-xs">·</span>
-                      <span className="text-xs font-semibold text-[#0d1b2a]">{ticket.category}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Building2 className="w-3 h-3 text-[#9aa3bb]" />
-                      <span className="text-xs text-[#5a6680]">{ticket.location}</span>
-                      <span className="text-[#dde2ec] text-xs">·</span>
-                      <Clock className="w-3 h-3 text-[#9aa3bb]" />
-                      <span className="text-xs text-[#9aa3bb]">{ticket.submitted}</span>
-                    </div>
-                    {ticket.note && (
-                      <p className="text-xs text-[#5a6680] mt-1.5 italic">"{ticket.note}"</p>
-                    )}
-                  </div>
+            <div key={ticket.id} className="bg-white rounded-2xl border p-5">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-xs font-bold text-blue-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{ticket.id}</span>
+                  <p className="text-sm font-semibold">{ticket.category}</p>
                 </div>
-
-                <div className="flex flex-col items-end gap-3 flex-shrink-0">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border"
-                    style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.text }} />
-                    {ticket.status}
-                  </span>
-                  {ticket.status !== "Reject" && (
-                    <ProgressStepper status={ticket.status} />
-                  )}
-                  {ticket.status === "Reject" && (
-                    <span className="text-[10px] text-[#9aa3bb] font-medium">Request closed</span>
-                  )}
-                </div>
+                <span className="text-xs font-bold border px-3 py-1 rounded-full" style={{ backgroundColor: s.bg, color: s.text, borderColor: s.border }}>{ticket.status}</span>
               </div>
             </div>
           );
@@ -1035,28 +783,40 @@ interface MaintTicket {
   id: string;
   location: string;
   category: string;
-  createdAt: number; // unix ms timestamp
+  createdAt: number;
+  inProgressAt?: number; // Captured exactly when moved to In Progress
+  completedAt?: number;  // Captures resolution timestamp
   status: MaintStatus;
   rejectReason?: string;
+  manualSettlementTime?: number; // Total custom task deadline pool defined in structural minutes
 }
 
-function formatElapsed(ms: number): string {
-  const totalSec = Math.floor(ms / 1000);
+// Formats a duration cleanly into text fields
+function formatCountdownDisplay(ms: number): string {
+  const isOverdue = ms < 0;
+  const absMs = Math.abs(ms);
+  
+  const totalSec = Math.floor(absMs / 1000);
   const days = Math.floor(totalSec / 86400);
   const hrs = Math.floor((totalSec % 86400) / 3600);
   const mins = Math.floor((totalSec % 3600) / 60);
   const secs = totalSec % 60;
-  if (days > 0) return `${days}d ${hrs}h ${mins}m ${secs}s`;
-  if (hrs > 0) return `${hrs}h ${mins}m ${secs}s`;
-  if (mins > 0) return `${mins}m ${secs}s`;
-  return `${secs}s`;
+
+  let timeString = "";
+  if (days > 0) timeString = `${days}d ${hrs}h ${mins}m ${secs}s`;
+  else if (hrs > 0) timeString = `${hrs}h ${mins}m ${secs}s`;
+  else if (mins > 0) timeString = `${mins}m ${secs}s`;
+  else timeString = `${secs}s`;
+
+  return isOverdue ? `-${timeString}` : timeString;
 }
 
-function elapsedColor(ms: number): string {
+// Color coding based on remaining time
+function getCountdownColor(ms: number): string {
+  if (ms <= 0) return "#c81e1e"; // Overdue -> Red
   const mins = ms / 60000;
-  if (mins < 15) return "#0e9f6e";   // green — fresh
-  if (mins < 60) return "#e3a008";   // amber — moderate
-  return "#c81e1e";                  // red   — overdue
+  if (mins < 15) return "#e3a008"; // Less than 15 mins left -> Amber warning
+  return "#0e9f6e"; // Plentiful time remaining -> Green
 }
 
 const maintStatusStyle: Record<MaintStatus, { bg: string; text: string; dot: string; border: string }> = {
@@ -1077,12 +837,12 @@ const REJECT_REASONS = [
 
 const NOW = Date.now();
 const INIT_TICKETS: MaintTicket[] = [
-  { id: "#8942", location: "Lab 2", category: "Projector Malfunction", createdAt: NOW - 5 * 60 * 1000, status: "Pending" },
-  { id: "#8937", location: "Room 201", category: "AC Unit Failure", createdAt: NOW - 72 * 60 * 1000, status: "In Progress" },
-  { id: "#8930", location: "Lecture Hall B", category: "Broken Door Lock", createdAt: NOW - 3 * 60 * 60 * 1000, status: "Pending" },
-  { id: "#8921", location: "IT Lab", category: "Network Outage", createdAt: NOW - 4.67 * 60 * 60 * 1000, status: "In Progress" },
-  { id: "#8914", location: "Library Floor 2", category: "Water Leak", createdAt: NOW - 6 * 60 * 60 * 1000, status: "Resolved" },
-  { id: "#8908", location: "Room 102", category: "Lighting Issue", createdAt: NOW - 25 * 60 * 60 * 1000, status: "Resolved" },
+  { id: "#8942", location: "Lab 2", category: "Projector Malfunction", createdAt: NOW - 30 * 60 * 1000, status: "Pending" },
+  { id: "#8937", location: "Room 201", category: "AC Unit Failure", createdAt: NOW - 120 * 60 * 1000, inProgressAt: NOW - 10 * 60 * 1000, status: "In Progress" },
+  { id: "#8930", location: "Lecture Hall B", category: "Broken Door Lock", createdAt: NOW - 180 * 60 * 1000, status: "Pending" },
+  { id: "#8921", location: "IT Lab", category: "Network Outage", createdAt: NOW - 300 * 60 * 1000, inProgressAt: NOW - 70 * 60 * 1000, status: "In Progress" }, // Initial standard 1hr SLA has expired
+  { id: "#8914", location: "Library Floor 2", category: "Water Leak", createdAt: NOW - 400 * 60 * 1000, inProgressAt: NOW - 390 * 60 * 1000, completedAt: NOW - 345 * 60 * 1000, status: "Resolved", manualSettlementTime: 60 },
+  { id: "#8908", location: "Room 102", category: "Lighting Issue", createdAt: NOW - 1500 * 60 * 1000, inProgressAt: NOW - 1400 * 60 * 1000, completedAt: NOW - 1300 * 60 * 1000, status: "Resolved" },
 ];
 
 function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
@@ -1092,35 +852,76 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
   const [rejectReason, setRejectReason] = useState("");
   const [rejectNote, setRejectNote] = useState("");
   const [now, setNow] = useState(Date.now());
+  
+  // Track inputs separated into structural categories
+  const [editingTimeId, setEditingTimeId] = useState<string | null>(null);
+  const [inputDays, setInputDays] = useState<string>("");
+  const [inputMinutes, setInputMinutes] = useState<string>("");
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const update = (id: string, status: MaintStatus) => {
-    if (status === "Rejected") {
+  const update = (id: string, nextStatus: MaintStatus) => {
+    if (nextStatus === "Rejected") {
       setRejectTarget(id);
       setRejectReason("");
       setRejectNote("");
       setOpenDrop(null);
       return;
     }
-    setTickets(tickets.map((t) => (t.id === id ? { ...t, status, rejectReason: undefined } : t)));
+
+    setTickets(tickets.map((t) => {
+      if (t.id !== id) return t;
+      
+      let updatedPatch: Partial<MaintTicket> = { status: nextStatus, rejectReason: undefined };
+      
+      if (nextStatus === "In Progress" && !t.inProgressAt) {
+        updatedPatch.inProgressAt = Date.now();
+      }
+      
+      if ((nextStatus === "Resolved" || nextStatus === "Rejected") && !t.completedAt) {
+        updatedPatch.completedAt = Date.now();
+      }
+
+      if (nextStatus === "Pending") {
+        updatedPatch.inProgressAt = undefined;
+        updatedPatch.completedAt = undefined;
+        updatedPatch.manualSettlementTime = undefined;
+      }
+
+      return { ...t, ...updatedPatch };
+    }));
     setOpenDrop(null);
   };
 
   const confirmReject = () => {
     if (!rejectTarget || !rejectReason) return;
-    const reason = rejectReason === "Other (see note below)" && rejectNote
-      ? rejectNote
-      : rejectReason;
-    setTickets(tickets.map((t) =>
-      t.id === rejectTarget ? { ...t, status: "Rejected", rejectReason: reason } : t
-    ));
+    const reason = rejectReason === "Other (see note below)" && rejectNote ? rejectNote : rejectReason;
+    setTickets(tickets.map((t) => t.id === rejectTarget ? { ...t, status: "Rejected", rejectReason: reason, completedAt: Date.now() } : t));
     setRejectTarget(null);
     setRejectReason("");
     setRejectNote("");
+  };
+
+  const saveManualTime = (id: string) => {
+    const days = Math.max(0, parseInt(inputDays, 10) || 0);
+    const mins = Math.max(0, parseInt(inputMinutes, 10) || 0);
+    
+    const totalMinutes = (days * 1440) + mins;
+    setTickets(tickets.map((t) => (t.id === id ? { ...t, manualSettlementTime: totalMinutes } : t)));
+    
+    setEditingTimeId(null);
+    setInputDays("");
+    setInputMinutes("");
+  };
+
+  const clearManualTime = (id: string) => {
+    setTickets(tickets.map((t) => (t.id === id ? { ...t, manualSettlementTime: undefined } : t)));
+    setEditingTimeId(null);
+    setInputDays("");
+    setInputMinutes("");
   };
 
   const pending = tickets.filter((t) => t.status === "Pending").length;
@@ -1157,7 +958,7 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
         <table className="w-full">
           <thead>
             <tr className="bg-[#f7f8fa] border-b border-[rgba(15,32,68,0.07)]">
-              {["Ticket ID", "Facility Location", "Issue Category", "Time Elapsed", "Action Status"].map((h) => (
+              {["Ticket ID", "Facility Location", "Issue Category", "Time Remaining", "Action Status"].map((h) => (
                 <th key={h} className="px-5 py-3.5 text-left text-[11px] font-bold text-[#9aa3bb] uppercase tracking-widest">
                   {h}
                 </th>
@@ -1187,26 +988,133 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
                     <span className="text-sm text-[#0d1b2a]">{t.category}</span>
                   </td>
                   <td className="px-5 py-4">
-                    {(() => {
-                      const ms = now - t.createdAt;
-                      const color = (t.status === "Resolved" || t.status === "Rejected") ? "#9aa3bb" : elapsedColor(ms);
-                      return (
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
-                          <span
-                            className="text-xs font-bold tabular-nums"
-                            style={{ fontFamily: "'JetBrains Mono', monospace", color }}
+                    <div className="flex items-center gap-2 group min-h-[32px]">
+                      {editingTimeId === t.id ? (
+                        <div className="flex items-center gap-1.5 bg-[#eef0f6] p-1.5 rounded-lg border border-[rgba(15,32,68,0.12)]">
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              className="w-12 px-1 py-0.5 text-xs rounded border bg-white focus:outline-none"
+                              placeholder="Days"
+                              value={inputDays}
+                              onChange={(e) => setInputDays(e.target.value)}
+                              min="0"
+                            />
+                            <span className="text-[10px] text-slate-500 font-bold">d</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              className="w-12 px-1 py-0.5 text-xs rounded border bg-white focus:outline-none"
+                              placeholder="Mins"
+                              value={inputMinutes}
+                              onChange={(e) => setInputMinutes(e.target.value)}
+                              min="0"
+                            />
+                            <span className="text-[10px] text-slate-500 font-bold">m</span>
+                          </div>
+                          <button
+                            onClick={() => saveManualTime(t.id)}
+                            className="p-1 bg-green-600 rounded text-white hover:bg-green-700"
+                            title="Save Allotted Time Window"
                           >
-                            {formatElapsed(ms)}
-                          </span>
-                          {t.status !== "Resolved" && t.status !== "Rejected" && ms > 60 * 60 * 1000 && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200 uppercase tracking-wide flex-shrink-0">
-                              Overdue
-                            </span>
+                            <Check className="w-3 h-3" />
+                          </button>
+                          {t.manualSettlementTime !== undefined && (
+                            <button
+                              onClick={() => clearManualTime(t.id)}
+                              className="p-1 bg-amber-600 rounded text-white hover:bg-amber-700 text-[9px] font-bold px-1"
+                              title="Clear Overrides"
+                            >
+                              Reset
+                            </button>
                           )}
+                          <button
+                            onClick={() => setEditingTimeId(null)}
+                            className="p-1 bg-slate-400 rounded text-white hover:bg-slate-500"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
                         </div>
-                      );
-                    })()}
+                      ) : (
+                        <>
+                          {(() => {
+                            // 1. Pending Status -> Not Started yet
+                            if (t.status === "Pending") {
+                              return (
+                                <div className="flex items-center gap-1.5 text-slate-400">
+                                  <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <span className="text-xs font-semibold italic">--h --m --s (Not Started)</span>
+                                </div>
+                              );
+                            }
+
+                            // Calculate available target resolution budget parameter
+                            // Standard allowance fallback goal = 1 hour (60 minutes) if no manual value is assigned
+                            const allocationMinutes = t.manualSettlementTime !== undefined ? t.manualSettlementTime : 60;
+                            const totalAllottedMs = allocationMinutes * 60 * 1000;
+
+                            let remainingMs = 0;
+                            const hasManual = t.manualSettlementTime !== undefined;
+
+                            if (t.status === "In Progress") {
+                              const targetDeadline = (t.inProgressAt || now) + totalAllottedMs;
+                              remainingMs = targetDeadline - now;
+                            } else {
+                              // Resolved / Rejected status -> Displays final static snapshot context upon closure
+                              const finalSpentTime = (t.completedAt || now) - (t.inProgressAt || t.createdAt);
+                              remainingMs = totalAllottedMs - finalSpentTime;
+                            }
+
+                            const isClosed = t.status === "Resolved" || t.status === "Rejected";
+                            
+                            // Style determination based on remaining calculation status
+                            const color = isClosed ? "#9aa3bb" : getCountdownColor(remainingMs);
+                            const displayString = isClosed 
+                              ? `Completed in: ${formatCountdownDisplay(Math.abs(totalAllottedMs - remainingMs))}`
+                              : formatCountdownDisplay(remainingMs);
+                            
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+                                <span
+                                  className="text-xs font-bold tabular-nums flex items-center gap-1"
+                                  style={{ fontFamily: "'JetBrains Mono', monospace", color }}
+                                >
+                                  {displayString}
+                                  {hasManual && <span className="text-[9px] font-medium opacity-65">(Manual Target)</span>}
+                                </span>
+                                {!isClosed && remainingMs <= 0 && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200 uppercase tracking-wide flex-shrink-0 animate-pulse">
+                                    Overdue
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                          
+                          {/* Only allow edit accessibility fields if item has left structural baseline pending index */}
+                          {t.status !== "Pending" && (
+                            <button
+                              onClick={() => {
+                                setEditingTimeId(t.id);
+                                if (t.manualSettlementTime !== undefined) {
+                                  setInputDays(String(Math.floor(t.manualSettlementTime / 1440)));
+                                  setInputMinutes(String(t.manualSettlementTime % 1440));
+                                } else {
+                                  setInputDays("");
+                                  setInputMinutes("");
+                                }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#eef0f6] rounded transition-all text-[#9aa3bb] hover:text-[#0f2044]"
+                              title="Manually alter ticket deadline allocation"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="space-y-1">
@@ -1227,12 +1135,11 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
                           <div className="absolute left-0 top-full mt-1.5 z-20 bg-white rounded-xl border border-[rgba(15,32,68,0.12)] shadow-xl overflow-hidden w-44">
                             {(["Pending", "In Progress", "Resolved", "Rejected"] as MaintStatus[]).map((st) => {
                               const ss = maintStatusStyle[st];
-                              const isReject = st === "Rejected";
                               return (
                                 <button
                                   key={st}
                                   onClick={() => update(t.id, st)}
-                                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors text-left hover:bg-[#f7f8fa] ${t.status === st ? "bg-[#f0f2f7]" : ""} ${isReject ? "border-t border-[rgba(15,32,68,0.06)]" : ""}`}
+                                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors text-left hover:bg-[#f7f8fa] ${t.status === st ? "bg-[#f0f2f7]" : ""}`}
                                 >
                                   <span className={`w-2 h-2 rounded-full ${ss.dot}`} />
                                   <span style={{ color: ss.text }}>{st}</span>
@@ -1261,10 +1168,7 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
       {rejectTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setRejectTarget(null)} />
-          <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4"
-            style={{ border: "2px solid #c81e1e" }}
-          >
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" style={{ border: "2px solid #c81e1e" }}>
             <div className="bg-red-50 px-6 pt-6 pb-5 border-b border-red-100 rounded-t-2xl">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 border border-red-200">
@@ -1272,9 +1176,7 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
                 </div>
                 <div className="flex-1">
                   <p className="font-extrabold text-red-700 text-sm">Reject Maintenance Request</p>
-                  <p className="text-red-400 text-xs mt-0.5">
-                    Ticket {rejectTarget} · Please provide a reason
-                  </p>
+                  <p className="text-red-400 text-xs mt-0.5">Ticket {rejectTarget} · Please provide a reason</p>
                 </div>
                 <button onClick={() => setRejectTarget(null)} className="text-red-300 hover:text-red-600 transition-colors">
                   <X className="w-4 h-4" />
@@ -1284,17 +1186,13 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
 
             <div className="px-6 py-5 space-y-4">
               <div>
-                <p className="text-[11px] font-bold text-[#0f2044] uppercase tracking-widest mb-3">
-                  Select Rejection Reason
-                </p>
+                <p className="text-[11px] font-bold text-[#0f2044] uppercase tracking-widest mb-3">Select Rejection Reason</p>
                 <div className="space-y-2">
                   {REJECT_REASONS.map((reason) => (
                     <label
                       key={reason}
                       className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                        rejectReason === reason
-                          ? "border-red-300 bg-red-50"
-                          : "border-[rgba(15,32,68,0.08)] hover:border-[rgba(15,32,68,0.18)] bg-[#fafbfd]"
+                        rejectReason === reason ? "border-red-300 bg-red-50" : "border-[rgba(15,32,68,0.08)] bg-[#fafbfd]"
                       }`}
                     >
                       <input
@@ -1305,9 +1203,7 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
                         onChange={() => setRejectReason(reason)}
                         className="mt-0.5 accent-red-500 flex-shrink-0"
                       />
-                      <span className={`text-xs font-medium leading-relaxed ${rejectReason === reason ? "text-red-700" : "text-[#0d1b2a]"}`}>
-                        {reason}
-                      </span>
+                      <span className={`text-xs font-medium leading-relaxed ${rejectReason === reason ? "text-red-700" : "text-[#0d1b2a]"}`}>{reason}</span>
                     </label>
                   ))}
                 </div>
@@ -1315,31 +1211,24 @@ function MaintenanceDashboard({ activeTab }: { activeTab: string }) {
 
               {rejectReason === "Other (see note below)" && (
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-[#0f2044] uppercase tracking-widest">
-                    Additional Note
-                  </label>
+                  <label className="text-[11px] font-bold text-[#0f2044] uppercase tracking-widest">Additional Note</label>
                   <textarea
                     value={rejectNote}
                     onChange={(e) => setRejectNote(e.target.value)}
                     rows={3}
                     placeholder="Describe the reason for rejection..."
-                    className="w-full px-4 py-3 rounded-xl bg-[#eef0f6] border border-transparent focus:border-red-400 focus:bg-white focus:outline-none text-sm text-[#0d1b2a] placeholder-[#9aa3bb] transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-[#eef0f6] border border-transparent focus:border-red-400 focus:bg-white focus:outline-none text-sm text-[#0d1b2a] transition-all resize-none"
                   />
                 </div>
               )}
             </div>
 
             <div className="px-6 pb-6 flex gap-3">
-              <button
-                onClick={() => setRejectTarget(null)}
-                className="flex-1 py-2.5 rounded-xl bg-[#eef0f6] text-[#5a6680] text-sm font-bold hover:bg-[#e4e8f0] transition-colors"
-              >
-                Cancel
-              </button>
+              <button onClick={() => setRejectTarget(null)} className="flex-1 py-2.5 rounded-xl bg-[#eef0f6] text-[#5a6680] text-sm font-bold">Cancel</button>
               <button
                 onClick={confirmReject}
                 disabled={!rejectReason || (rejectReason === "Other (see note below)" && !rejectNote)}
-                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold disabled:opacity-40"
               >
                 Confirm Reject
               </button>
