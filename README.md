@@ -1,4 +1,4 @@
-## 🎮 Live Interactive Prototype
+## Interactive Prototype
 
 You can interact with the system prototype flow directly below:
 
